@@ -1,0 +1,26 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "##application-name##.fullname" . -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+{{ include "##application-name##.labels" . | indent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  tls:
+    - hosts:
+        - {{ .Values.hostname }}
+      secretName: {{ .Values.tlssecret }}
+  rules:
+    - host: {{ .Values.hostname }}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: http
+{{- end }}
